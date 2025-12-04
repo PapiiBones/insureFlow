@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Lead, LeadStatus, PolicyType, ViewState } from './types';
 import { Dashboard } from './components/Dashboard';
@@ -58,9 +59,10 @@ const App: React.FC = () => {
     setLeads([...leads, newLead]);
   };
 
-  const updateLeadStatus = (id: string, status: LeadStatus) => {
+  // Generalized update function
+  const updateLead = (id: string, updates: Partial<Lead>) => {
     setLeads(leads.map(lead => 
-      lead.id === id ? { ...lead, status } : lead
+      lead.id === id ? { ...lead, ...updates } : lead
     ));
   };
 
@@ -71,7 +73,7 @@ const App: React.FC = () => {
       case 'finder':
         return <LeadFinder onAddLead={addLead} />;
       case 'leads':
-        return <LeadManager leads={leads} updateLeadStatus={updateLeadStatus} />;
+        return <LeadManager leads={leads} updateLead={updateLead} />;
       case 'script-gen':
         return <ScriptGenerator leads={leads} />;
       case 'sop':
