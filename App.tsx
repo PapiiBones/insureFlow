@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Lead, LeadStatus, PolicyType, ViewState } from './types';
 import { Dashboard } from './components/Dashboard';
 import { ScriptGenerator } from './components/ScriptGenerator';
@@ -11,8 +11,8 @@ import { DashboardIcon, LeadsIcon, ScriptIcon, SOPIcon, RadarIcon } from './comp
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewState>('dashboard');
   
-  // Initial Mock Data
-  const [leads, setLeads] = useState<Lead[]>([
+  // INITIAL DATA (Used only if LocalStorage is empty)
+  const initialMockData: Lead[] = [
     {
       id: '1',
       name: 'Robert Martinez',
@@ -22,7 +22,9 @@ const App: React.FC = () => {
       policyInterest: PolicyType.MORTGAGE_PROTECTION,
       estimatedCommission: 3500,
       notes: 'New homeowner, closed 2 weeks ago. 35yo male, non-smoker.',
-      history: []
+      history: [],
+      source: 'Facebook Ads',
+      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString() // 5 days ago
     },
     {
       id: '2',
@@ -33,7 +35,9 @@ const App: React.FC = () => {
       policyInterest: PolicyType.WHOLE_LIFE,
       estimatedCommission: 12000,
       notes: 'Interested in Infinite Banking concept for small business liquidity.',
-      history: []
+      history: [],
+      source: 'Referral',
+      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 12).toISOString()
     },
     {
       id: '3',
@@ -44,7 +48,9 @@ const App: React.FC = () => {
       policyInterest: PolicyType.TERM_LIFE,
       estimatedCommission: 1500,
       notes: 'Looking for basic coverage, cost sensitive.',
-      history: []
+      history: [],
+      source: 'Direct Mail',
+      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString()
     },
     {
       id: '4',
@@ -55,17 +61,39 @@ const App: React.FC = () => {
       policyInterest: PolicyType.MORTGAGE_PROTECTION,
       estimatedCommission: 4200,
       notes: 'Sold full return of premium rider.',
-      history: []
+      history: [],
+      source: 'Facebook Ads',
+      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 20).toISOString(),
+      closedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString()
     }
-  ]);
+  ];
+
+  // Initialize state from LocalStorage or fall back to initial data
+  const [leads, setLeads] = useState<Lead[]>(() => {
+    const savedLeads = localStorage.getItem('insureflow_leads');
+    if (savedLeads) {
+      try {
+        return JSON.parse(savedLeads);
+      } catch (e) {
+        console.error("Failed to parse leads from local storage", e);
+        return initialMockData;
+      }
+    }
+    return initialMockData;
+  });
+
+  // Save to LocalStorage whenever leads change
+  useEffect(() => {
+    localStorage.setItem('insureflow_leads', JSON.stringify(leads));
+  }, [leads]);
 
   const addLead = (newLead: Lead) => {
-    setLeads([...leads, newLead]);
+    setLeads(prev => [...prev, newLead]);
   };
 
   // Generalized update function
   const updateLead = (id: string, updates: Partial<Lead>) => {
-    setLeads(leads.map(lead => 
+    setLeads(prev => prev.map(lead => 
       lead.id === id ? { ...lead, ...updates } : lead
     ));
   };
@@ -103,6 +131,14 @@ const App: React.FC = () => {
     </button>
   );
 
+  // Calculate stats for sidebar
+  const totalClosed = leads
+    .filter(l => l.status === LeadStatus.CLOSED_WON)
+    .reduce((acc, curr) => acc + (curr.estimatedCommission || 0), 0);
+  
+  const monthlyGoal = 25000;
+  const goalPercentage = Math.min(100, Math.round((totalClosed / monthlyGoal) * 100));
+
   return (
     <div className="flex h-screen bg-slate-950 text-white font-sans overflow-hidden">
       {/* Sidebar Navigation */}
@@ -116,7 +152,7 @@ const App: React.FC = () => {
               InsureFlow <span className="text-gold-500">AI</span>
             </h1>
           </div>
-          <p className="text-xs text-slate-500 mt-2">Agent Command Center v2.0</p>
+          <p className="text-xs text-slate-500 mt-2">Agent Command Center</p>
         </div>
 
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
@@ -131,11 +167,11 @@ const App: React.FC = () => {
           <div className="bg-slate-800 rounded-lg p-4">
             <p className="text-xs text-slate-400 mb-1">Monthly Goal</p>
             <div className="flex justify-between items-end mb-2">
-              <span className="text-sm font-bold text-white">$21,200</span>
-              <span className="text-xs text-gold-500">84%</span>
+              <span className="text-sm font-bold text-white">${totalClosed.toLocaleString()}</span>
+              <span className="text-xs text-gold-500">{goalPercentage}%</span>
             </div>
             <div className="w-full bg-slate-700 rounded-full h-1.5">
-              <div className="bg-gold-500 h-1.5 rounded-full" style={{ width: '84%' }}></div>
+              <div className="bg-gold-500 h-1.5 rounded-full" style={{ width: `${goalPercentage}%` }}></div>
             </div>
           </div>
         </div>
@@ -150,15 +186,15 @@ const App: React.FC = () => {
           </div>
           
           <h2 className="text-lg font-semibold text-slate-200 capitalize hidden md:block">
-            {currentView === 'script-gen' ? 'AI Script Generator' : currentView.replace('-', ' ')}
+            {currentView === 'script-gen' ? 'AI Script Generator' : currentView === 'leads' ? 'Pipeline Manager' : currentView.replace('-', ' ')}
           </h2>
 
           <div className="flex items-center gap-4">
              <div className="flex items-center gap-2 text-sm text-slate-400">
                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-               System Online
+               Database Connected
              </div>
-             <div className="w-8 h-8 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center text-xs font-bold text-slate-300">
+             <div className="w-8 h-8 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center text-xs font-bold text-slate-300 cursor-pointer hover:bg-slate-600 transition">
                AG
              </div>
           </div>

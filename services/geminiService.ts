@@ -10,6 +10,7 @@ export const generateSalesScript = async (
   leadName: string,
   policyType: PolicyType,
   context: string,
+  tone: string,
   objection?: string
 ): Promise<string> => {
   try {
@@ -17,7 +18,10 @@ export const generateSalesScript = async (
     
     let prompt = `
       Act as a world-class, top 1% insurance sales trainer and closer. 
-      Your tonality is confident, authoritative yet empathetic, and unbreakable.
+      
+      **TONALITY INSTRUCTION:**
+      Adopt a **${tone}** tone. 
+      This is critical. The script must reflect this specific emotional and authoritative stance throughout every line.
       
       Task: Generate a sales script for a lead named "${leadName}" interested in "${policyType}".
       
@@ -27,13 +31,13 @@ export const generateSalesScript = async (
     if (objection) {
       prompt += `
       The lead just gave this objection: "${objection}".
-      Provide a "Pattern Interrupt" followed by a confident rebuttal that loops back to closing.
+      Provide a "Pattern Interrupt" followed by a rebuttal that matches the requested **${tone}** tone and loops back to closing.
       `;
     } else {
       prompt += `
       Provide a script for the initial call or presentation. 
       Structure:
-      1. Opener (Authority & Warmth)
+      1. Opener (Must establish the requested **${tone}** tone immediately)
       2. Discovery (Pain finding)
       3. The Solution (Tie specifically to ${policyType})
       4. The Close (Assumptive)
@@ -47,7 +51,7 @@ export const generateSalesScript = async (
     }
 
     prompt += `
-      Format the output in clean Markdown. Use bolding for emphasis on tonal shifts.
+      Format the output in clean Markdown. Use bolding for emphasis on words that require tonal inflection.
     `;
 
     const response = await ai.models.generateContent({
@@ -93,10 +97,11 @@ export const findPotentialLeads = async (
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
-      contents: `Generate 3 realistic, fictional leads for an insurance agent in ${city} who would be good candidates for ${policyType}.
+      contents: `Generate 3 realistic, high-quality sales leads for an insurance agent in ${city} who would be perfect candidates for ${policyType}.
       
+      These should act as "real" leads found from a database query.
       Provide a mix of scenarios (e.g., new homeowner, new parent, small business owner for infinite banking).
-      Generate realistic names, fake phone numbers (555-xxxx), and fake emails.
+      Generate realistic names, phone numbers (use 555 area codes for safety), and emails.
       Estimate a realistic commission value between $1000 and $8000 based on the policy type.
       `,
       config: {
@@ -109,7 +114,7 @@ export const findPotentialLeads = async (
               name: { type: Type.STRING },
               phone: { type: Type.STRING },
               email: { type: Type.STRING },
-              notes: { type: Type.STRING, description: "Brief background info on why they are a good lead" },
+              notes: { type: Type.STRING, description: "Detailed background info and 'why' they are a good lead" },
               estimatedCommission: { type: Type.NUMBER },
             },
             required: ["name", "phone", "email", "notes", "estimatedCommission"],

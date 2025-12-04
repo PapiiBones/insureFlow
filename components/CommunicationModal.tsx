@@ -77,11 +77,24 @@ export const CommunicationModal: React.FC<CommunicationModalProps> = ({ lead, on
 
   const handleSend = async () => {
     setIsSending(true);
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // Log internal interaction
     onSend(activeTab, activeTab === 'email' ? `Subject: ${subject}\n\n${message}` : message);
-    setIsSending(false);
-    onClose();
+
+    // Trigger Real World Action
+    setTimeout(() => {
+      if (activeTab === 'email') {
+        const mailtoLink = `mailto:${lead.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
+        window.location.href = mailtoLink;
+      } else {
+        // SMS handling
+        // 'sms:' protocol varies by device. iOS/Android often support ?body=
+        const smsLink = `sms:${lead.phone.replace(/[^0-9]/g, '')}?body=${encodeURIComponent(message)}`;
+        window.location.href = smsLink;
+      }
+      setIsSending(false);
+      onClose();
+    }, 500);
   };
 
   return (
@@ -173,7 +186,7 @@ export const CommunicationModal: React.FC<CommunicationModalProps> = ({ lead, on
             disabled={!message || isSending}
             className="bg-gold-500 hover:bg-gold-600 disabled:opacity-50 disabled:cursor-not-allowed text-black px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition"
           >
-            {isSending ? "Sending..." : "Send Message"} <SendIcon />
+            {isSending ? "Opening App..." : `Open ${activeTab === 'sms' ? 'Messages' : 'Email'}`} <SendIcon />
           </button>
         </div>
 

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { generateSalesScript } from '../services/geminiService';
@@ -8,19 +9,25 @@ interface ScriptGeneratorProps {
   leads: Lead[];
 }
 
+const TONE_OPTIONS = [
+  'Confident & Authoritative (Wolf of Wall Street)',
+  'Empathetic & Understanding',
+  'Consultative & Educational',
+  'Urgent & Action-Oriented',
+  'Relaxed & Relatable'
+];
+
 export const ScriptGenerator: React.FC<ScriptGeneratorProps> = ({ leads }) => {
   const [selectedLeadId, setSelectedLeadId] = useState<string>('');
   const [customContext, setCustomContext] = useState('');
   const [objection, setObjection] = useState('');
+  const [tone, setTone] = useState(TONE_OPTIONS[0]);
   const [generatedScript, setGeneratedScript] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleGenerate = async () => {
+    // Validate selection or context
     const lead = leads.find(l => l.id === selectedLeadId);
-    if (!lead && !selectedLeadId) {
-        // Allow generating generic script if no lead selected but ensure types work
-        // For this demo, let's force selection or generic
-    }
     
     setIsLoading(true);
     const leadName = lead ? lead.name : "Prospect";
@@ -30,6 +37,7 @@ export const ScriptGenerator: React.FC<ScriptGeneratorProps> = ({ leads }) => {
       leadName,
       policy,
       customContext || "Standard cold outbound call or lead response.",
+      tone,
       objection
     );
     
@@ -59,6 +67,19 @@ export const ScriptGenerator: React.FC<ScriptGeneratorProps> = ({ leads }) => {
                 <option key={lead.id} value={lead.id}>
                   {lead.name} - {lead.policyInterest}
                 </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-1">Sales Tonality</label>
+            <select 
+              value={tone}
+              onChange={(e) => setTone(e.target.value)}
+              className="w-full bg-slate-900 border border-slate-600 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-gold-500 focus:border-transparent outline-none transition"
+            >
+              {TONE_OPTIONS.map(t => (
+                <option key={t} value={t}>{t}</option>
               ))}
             </select>
           </div>

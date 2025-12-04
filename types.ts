@@ -36,6 +36,9 @@ export interface Lead {
   lastContacted?: string;
   nextFollowUp?: string;
   history: Interaction[];
+  source?: string;
+  createdAt?: string;
+  closedAt?: string;
 }
 
 export interface SOP {
