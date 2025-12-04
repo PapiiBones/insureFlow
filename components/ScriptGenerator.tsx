@@ -17,11 +17,20 @@ const TONE_OPTIONS = [
   'Relaxed & Relatable'
 ];
 
+const PERSONA_OPTIONS = [
+  'Elite 1% Closer (High Pressure)',
+  'Trusted Family Advisor (Warm & Safe)',
+  'Data-Driven Analyst (Logical)',
+  'New Agent (Humble & Hungry)',
+  'Tech-Savvy Millennial (Modern & Quick)'
+];
+
 export const ScriptGenerator: React.FC<ScriptGeneratorProps> = ({ leads }) => {
   const [selectedLeadId, setSelectedLeadId] = useState<string>('');
   const [customContext, setCustomContext] = useState('');
   const [objection, setObjection] = useState('');
   const [tone, setTone] = useState(TONE_OPTIONS[0]);
+  const [persona, setPersona] = useState(PERSONA_OPTIONS[0]);
   const [generatedScript, setGeneratedScript] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -38,6 +47,7 @@ export const ScriptGenerator: React.FC<ScriptGeneratorProps> = ({ leads }) => {
       policy,
       customContext || "Standard cold outbound call or lead response.",
       tone,
+      persona,
       objection
     );
     
@@ -71,17 +81,32 @@ export const ScriptGenerator: React.FC<ScriptGeneratorProps> = ({ leads }) => {
             </select>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">Sales Tonality</label>
-            <select 
-              value={tone}
-              onChange={(e) => setTone(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-600 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-gold-500 focus:border-transparent outline-none transition"
-            >
-              {TONE_OPTIONS.map(t => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">Agent Persona</label>
+              <select 
+                value={persona}
+                onChange={(e) => setPersona(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-600 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-gold-500 focus:border-transparent outline-none transition"
+              >
+                {PERSONA_OPTIONS.map(p => (
+                  <option key={p} value={p}>{p}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">Sales Tonality</label>
+              <select 
+                value={tone}
+                onChange={(e) => setTone(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-600 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-gold-500 focus:border-transparent outline-none transition"
+              >
+                {TONE_OPTIONS.map(t => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div>

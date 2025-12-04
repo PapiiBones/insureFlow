@@ -11,13 +11,15 @@ export const generateSalesScript = async (
   policyType: PolicyType,
   context: string,
   tone: string,
+  persona: string,
   objection?: string
 ): Promise<string> => {
   try {
-    const model = 'gemini-3.0-pro-preview'; // or the specific version ID provided in AI Studio
+    // Corrected model name from gemini-3.0-pro-preview to gemini-3-pro-preview
+    const model = 'gemini-3-pro-preview'; 
     
     let prompt = `
-      Act as a world-class, top 1% insurance sales trainer and closer. 
+      Act as a **${persona}**. You are selling life insurance.
       
       **TONALITY INSTRUCTION:**
       Adopt a **${tone}** tone. 
@@ -31,7 +33,7 @@ export const generateSalesScript = async (
     if (objection) {
       prompt += `
       The lead just gave this objection: "${objection}".
-      Provide a "Pattern Interrupt" followed by a rebuttal that matches the requested **${tone}** tone and loops back to closing.
+      Provide a "Pattern Interrupt" followed by a rebuttal that matches the requested **${tone}** tone and **${persona}** style, looping back to closing.
       `;
     } else {
       prompt += `
@@ -60,8 +62,11 @@ export const generateSalesScript = async (
     });
 
     return response.text || "Failed to generate script. Please try again.";
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gemini API Error:", error);
+    if (error.status === 404 || (error.message && error.message.includes('404'))) {
+        return "## Error: Model Not Found\nThe requested AI model is currently unavailable. Please verify the API key and model availability.";
+    }
     return "## Error\nUnable to generate script at this time. Please check your API configuration.";
   }
 };
