@@ -102,10 +102,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ leads }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Charts */}
-        <div className="bg-slate-800 border border-slate-700 p-6 rounded-xl shadow-lg">
+        <div className="bg-slate-800 border border-slate-700 p-6 rounded-xl shadow-lg min-w-0">
           <h3 className="text-lg font-semibold text-white mb-6">Pipeline Health</h3>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
               <BarChart data={statusData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                 <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickFormatter={(val) => val.split(' ')[0]} />
@@ -120,10 +120,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ leads }) => {
           </div>
         </div>
 
-        <div className="bg-slate-800 border border-slate-700 p-6 rounded-xl shadow-lg">
+        <div className="bg-slate-800 border border-slate-700 p-6 rounded-xl shadow-lg min-w-0">
           <h3 className="text-lg font-semibold text-white mb-6">Marketing ROI (Spend vs Return)</h3>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
               <LineChart data={roiData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                 <XAxis dataKey="month" stroke="#94a3b8" />
@@ -142,7 +142,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ leads }) => {
       {/* Commission Breakdown Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Breakdown Table */}
-          <div className="lg:col-span-2 bg-slate-800 border border-slate-700 p-6 rounded-xl shadow-lg">
+          <div className="lg:col-span-2 bg-slate-800 border border-slate-700 p-6 rounded-xl shadow-lg overflow-hidden">
              <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-white">Revenue by Policy Type</h3>
                 <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Live Data</span>
@@ -179,10 +179,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ leads }) => {
           </div>
 
           {/* Value Distribution Chart */}
-          <div className="bg-slate-800 border border-slate-700 p-6 rounded-xl shadow-lg flex flex-col">
+          <div className="bg-slate-800 border border-slate-700 p-6 rounded-xl shadow-lg flex flex-col min-w-0">
              <h3 className="text-lg font-semibold text-white mb-2">Value Distribution</h3>
-             <div className="flex-1 min-h-[200px] relative">
-               <ResponsiveContainer width="100%" height="100%">
+             <div className="h-64 relative w-full">
+               <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                  <PieChart>
                    <Pie
                      data={pieData}

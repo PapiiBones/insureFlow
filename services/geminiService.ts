@@ -13,7 +13,7 @@ export const generateSalesScript = async (
   objection?: string
 ): Promise<string> => {
   try {
-    const model = 'gemini-2.5-flash';
+    const model = 'gemini-3.0-pro-preview'; // or the specific version ID provided in AI Studio
     
     let prompt = `
       Act as a world-class, top 1% insurance sales trainer and closer. 
