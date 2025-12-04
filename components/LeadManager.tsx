@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
-import { Lead, LeadStatus, PolicyType } from '../types';
+import { Lead, LeadStatus, PolicyType, Interaction } from '../types';
 import { CommunicationModal } from './CommunicationModal';
-import { MessageSquareIcon } from './Icons';
+import { CallLogModal } from './CallLogModal';
+import { MessageSquareIcon, PhoneOutgoingIcon, CalendarIcon } from './Icons';
 
 interface LeadManagerProps {
   leads: Lead[];
@@ -11,6 +12,7 @@ interface LeadManagerProps {
 
 export const LeadManager: React.FC<LeadManagerProps> = ({ leads, updateLead }) => {
   const [selectedLeadForComm, setSelectedLeadForComm] = useState<Lead | null>(null);
+  const [selectedLeadForCall, setSelectedLeadForCall] = useState<Lead | null>(null);
   
   const getStatusColor = (status: LeadStatus) => {
     switch (status) {
@@ -25,16 +27,33 @@ export const LeadManager: React.FC<LeadManagerProps> = ({ leads, updateLead }) =
 
   const handleSendMessage = (type: 'sms' | 'email', content: string) => {
     if (selectedLeadForComm) {
-      // In a real app, this would call an API
-      console.log(`Sending ${type} to ${selectedLeadForComm.name}:`, content);
-      
-      // Update last contacted
+      const interaction: Interaction = {
+        id: Date.now().toString(),
+        date: new Date().toISOString(),
+        type: type === 'sms' ? 'SMS' : 'Email',
+        outcome: 'Sent',
+        notes: `Content: ${content.substring(0, 50)}...`,
+      };
+
       updateLead(selectedLeadForComm.id, {
         lastContacted: new Date().toISOString(),
-        status: selectedLeadForComm.status === LeadStatus.NEW ? LeadStatus.CONTACTED : selectedLeadForComm.status
+        status: selectedLeadForComm.status === LeadStatus.NEW ? LeadStatus.CONTACTED : selectedLeadForComm.status,
+        history: [...selectedLeadForComm.history, interaction]
       });
 
       alert(`${type.toUpperCase()} sent successfully to ${selectedLeadForComm.name}!`);
+    }
+  };
+
+  const handleSaveCallLog = (interaction: Interaction, newStatus: LeadStatus, nextFollowUp?: string) => {
+    if (selectedLeadForCall) {
+      updateLead(selectedLeadForCall.id, {
+        lastContacted: interaction.date,
+        status: newStatus,
+        history: [...selectedLeadForCall.history, interaction],
+        nextFollowUp: nextFollowUp || selectedLeadForCall.nextFollowUp
+      });
+      setSelectedLeadForCall(null);
     }
   };
 
@@ -53,7 +72,7 @@ export const LeadManager: React.FC<LeadManagerProps> = ({ leads, updateLead }) =
             <tr className="text-slate-400 text-sm border-b border-slate-700">
               <th className="px-6 py-4 font-medium">Prospect Name</th>
               <th className="px-6 py-4 font-medium">Policy Interest</th>
-              <th className="px-6 py-4 font-medium">Last Contact</th>
+              <th className="px-6 py-4 font-medium">Last / Next Contact</th>
               <th className="px-6 py-4 font-medium">Potential Comm.</th>
               <th className="px-6 py-4 font-medium">Status</th>
               <th className="px-6 py-4 font-medium text-right">Actions</th>
@@ -73,11 +92,19 @@ export const LeadManager: React.FC<LeadManagerProps> = ({ leads, updateLead }) =
                   </span>
                 </td>
                 <td className="px-6 py-4 text-slate-400 text-sm">
-                   {lead.lastContacted ? (
-                     new Date(lead.lastContacted).toLocaleDateString()
-                   ) : (
-                     <span className="text-slate-600 italic">Never</span>
-                   )}
+                   <div className="flex flex-col gap-1">
+                      {lead.lastContacted ? (
+                        <span className="text-xs">Last: {new Date(lead.lastContacted).toLocaleDateString()}</span>
+                      ) : (
+                        <span className="text-xs text-slate-600 italic">Never Contacted</span>
+                      )}
+                      {lead.nextFollowUp && (
+                         <span className="text-xs text-gold-500 flex items-center gap-1">
+                           <CalendarIcon />
+                           {new Date(lead.nextFollowUp).toLocaleDateString()} {new Date(lead.nextFollowUp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                         </span>
+                      )}
+                   </div>
                 </td>
                 <td className="px-6 py-4 text-emerald-400 font-mono">
                   ${lead.estimatedCommission.toLocaleString()}
@@ -96,14 +123,18 @@ export const LeadManager: React.FC<LeadManagerProps> = ({ leads, updateLead }) =
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
                     <button 
+                      onClick={() => setSelectedLeadForCall(lead)}
+                      className="p-2 bg-slate-700 hover:bg-blue-600 hover:text-white text-slate-300 rounded-lg transition"
+                      title="Log Call"
+                    >
+                      <PhoneOutgoingIcon />
+                    </button>
+                    <button 
                       onClick={() => setSelectedLeadForComm(lead)}
                       className="p-2 bg-slate-700 hover:bg-gold-500 hover:text-black text-slate-300 rounded-lg transition"
                       title="Send Message"
                     >
                       <MessageSquareIcon />
-                    </button>
-                    <button className="text-sm text-slate-400 hover:text-white font-medium px-3 py-2">
-                      Details
                     </button>
                   </div>
                 </td>
@@ -118,6 +149,14 @@ export const LeadManager: React.FC<LeadManagerProps> = ({ leads, updateLead }) =
           lead={selectedLeadForComm} 
           onClose={() => setSelectedLeadForComm(null)}
           onSend={handleSendMessage}
+        />
+      )}
+
+      {selectedLeadForCall && (
+        <CallLogModal
+          lead={selectedLeadForCall}
+          onClose={() => setSelectedLeadForCall(null)}
+          onSave={handleSaveCallLog}
         />
       )}
     </div>

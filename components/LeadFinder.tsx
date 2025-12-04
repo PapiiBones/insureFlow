@@ -38,6 +38,7 @@ export const LeadFinder: React.FC<LeadFinderProps> = ({ onAddLead }) => {
       policyInterest: policyType,
       estimatedCommission: lead.estimatedCommission || 1000,
       notes: `Source: Auto-Finder (${city}). ${lead.notes}`,
+      history: []
     };
     
     onAddLead(newLead);

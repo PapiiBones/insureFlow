@@ -22,6 +22,7 @@ const App: React.FC = () => {
       policyInterest: PolicyType.MORTGAGE_PROTECTION,
       estimatedCommission: 3500,
       notes: 'New homeowner, closed 2 weeks ago. 35yo male, non-smoker.',
+      history: []
     },
     {
       id: '2',
@@ -32,6 +33,7 @@ const App: React.FC = () => {
       policyInterest: PolicyType.WHOLE_LIFE,
       estimatedCommission: 12000,
       notes: 'Interested in Infinite Banking concept for small business liquidity.',
+      history: []
     },
     {
       id: '3',
@@ -42,6 +44,7 @@ const App: React.FC = () => {
       policyInterest: PolicyType.TERM_LIFE,
       estimatedCommission: 1500,
       notes: 'Looking for basic coverage, cost sensitive.',
+      history: []
     },
     {
       id: '4',
@@ -52,6 +55,7 @@ const App: React.FC = () => {
       policyInterest: PolicyType.MORTGAGE_PROTECTION,
       estimatedCommission: 4200,
       notes: 'Sold full return of premium rider.',
+      history: []
     }
   ]);
 

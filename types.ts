@@ -15,6 +15,15 @@ export enum PolicyType {
   TERM_LIFE = 'Term Life',
 }
 
+export interface Interaction {
+  id: string;
+  date: string;
+  type: 'Call' | 'SMS' | 'Email';
+  outcome: string;
+  notes: string;
+  duration?: string;
+}
+
 export interface Lead {
   id: string;
   name: string;
@@ -25,6 +34,8 @@ export interface Lead {
   estimatedCommission: number;
   notes: string;
   lastContacted?: string;
+  nextFollowUp?: string;
+  history: Interaction[];
 }
 
 export interface SOP {
